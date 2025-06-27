@@ -1,0 +1,186 @@
+  // =================================================================
+  // Executive Tracker - Backend Logic v11 (Final Version)
+  // Developed for John Messiah by Google's Gemini AI
+  // =================================================================
+
+  const ss = SpreadsheetApp.openById("1pNZJtGAY78jDtwqhBhG33ZsTyh2LLTaFxFPhT9NMnrc");
+  const logSheet = ss.getSheetByName("Log");
+  const breakLogSheet = ss.getSheetByName("Log 2");
+  const validationSheet = ss.getSheetByName("Data validation");
+  const accessSheet = ss.getSheetByName("Access");
+
+  // --- UTILITY FUNCTIONS ---
+  function formatDate(dateObject) {
+    try {
+      const date = new Date(dateObject); // Ensure it's a Date object
+      if (isNaN(date.getTime())) return "";
+      return Utilities.formatDate(date, Session.getScriptTimeZone(), "dd/MMM/yyyy hh:mm:ss a");
+    } catch (e) { return ""; }
+  }
+  function formatDuration(millis) {
+      if (isNaN(millis) || millis < 0) return "00:00:00";
+      const h = Math.floor(millis / 3600000).toString().padStart(2, '0');
+      const m = Math.floor((millis % 3600000) / 60000).toString().padStart(2, '0');
+      const s = Math.floor((millis % 60000) / 1000).toString().padStart(2, '0');
+      return `${h}:${m}:${s}`;
+  }
+
+  // --- ROUTING ---
+  function doGet(e) {
+    if (e.parameter.page === "supervisor") return HtmlService.createTemplateFromFile("SupervisorPage").evaluate().setTitle("Supervisor Portal");
+    if (e.parameter.page === "report") return HtmlService.createTemplateFromFile("ReportPage").evaluate().setTitle("Reports");
+    return HtmlService.createTemplateFromFile("HomePage").evaluate().setTitle("Executive Tracker");
+  }
+  function include(filename) { return HtmlService.createHtmlOutputFromFile(filename).getContent(); }
+
+  // --- HOME PAGE DATA FETCHER ---
+  function getHomePageData() {
+    try {
+      const email = Session.getActiveUser().getEmail();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const logData = logSheet.getDataRange().getValues();
+      const breakLogData = breakLogSheet.getDataRange().getValues();
+
+      let currentActivity = null;
+      for (let i = logData.length - 1; i >= 1; i--) {
+        if (logData[i][2] === email && logData[i][4] === '') {
+          currentActivity = { uniqueId: logData[i][1], name: logData[i][3] };
+          break;
+        }
+      }
+
+      let currentBreak = null;
+      for (let i = breakLogData.length - 1; i >= 1; i--) {
+        if (breakLogData[i][2] === email && breakLogData[i][5] === '') {
+          currentBreak = { uniqueId: breakLogData[i][1], reason: breakLogData[i][3], startTime: new Date(breakLogData[i][0]).getTime() };
+          break;
+        }
+      }
+
+      const todayLogs = logData
+        .filter(row => row[0] && !isNaN(new Date(row[0]).getTime()) && new Date(row[0]) >= today && row[2] === email)
+        .map(row => ({
+          start: formatDate(new Date(row[0])),
+          end: row[4] ? formatDate(new Date(row[4])) : 'Live',
+          activity: row[3],
+          duration: row[5] || ''
+        }));
+        
+      const personalBreakReasons = ["Snacks", "Lunch"];
+      let personalBreakMillis = 0, feedbackBreakMillis = 0;
+
+      breakLogData
+        .filter(row => row[0] && row[5] && !isNaN(new Date(row[0]).getTime()) && !isNaN(new Date(row[5]).getTime()) && new Date(row[0]) >= today && row[2] === email)
+        .forEach(row => {
+          const duration = new Date(row[5]).getTime() - new Date(row[0]).getTime();
+          if (personalBreakReasons.includes(row[3])) personalBreakMillis += duration;
+          else feedbackBreakMillis += duration;
+        });
+
+      return {
+        success: true, currentActivity, currentBreak, todayLogs,
+        personalBreakTotal: formatDuration(personalBreakMillis),
+        feedbackBreakTotal: formatDuration(feedbackBreakMillis)
+      };
+    } catch(e) {
+      Logger.log("Error in getHomePageData: " + e.toString() + " Stack: " + e.stack);
+      return { success: false, error: "Backend error: " + e.message };
+    }
+  }
+
+  // --- CORE ACTIONS ---
+  function startAction(type, nameOrReason, comment = "") {
+    const email = Session.getActiveUser().getEmail();
+    const timestamp = new Date();
+    if (type === 'Activity') {
+      logSheet.appendRow([timestamp, "ACT-" + timestamp.getTime(), email, nameOrReason, "", ""]);
+    } else {
+      breakLogSheet.appendRow([timestamp, "BRK-" + timestamp.getTime(), email, nameOrReason, comment, "", ""]);
+    }
+    return getHomePageData();
+  }
+  function finishAction(type, uniqueId) {
+    const endTime = new Date();
+    const sheet = (type === 'Activity') ? logSheet : breakLogSheet;
+    const endCol = (type === 'Activity') ? 5 : 6;
+    const durCol = (type === 'Activity') ? 6 : 7;
+    const uniqueIdColumn = sheet.getRange("B2:B" + sheet.getLastRow()).getValues().flat();
+    const rowIndex = uniqueIdColumn.indexOf(uniqueId);
+    if (rowIndex !== -1) {
+      const rowNumber = rowIndex + 2;
+      const startTime = new Date(sheet.getRange(rowNumber, 1).getValue());
+      sheet.getRange(rowNumber, endCol).setValue(endTime);
+      sheet.getRange(rowNumber, durCol).setValue(formatDuration(endTime - startTime));
+    } else { throw new Error(`Unique ID ${uniqueId} not found.`); }
+    return getHomePageData();
+  }
+
+  /**
+   * NEW FUNCTION: Finds a row by its Unique ID and recalculates its duration.
+   * This is useful for supervisors to correct or sync data.
+   * @param {string} uniqueId The Unique ID of the row to sync.
+   * @returns {object} A success or failure message.
+   */
+  function syncRowById(uniqueId) {
+    try {
+      let sheet;
+      let durCol;
+      let endCol;
+      let startTimeCol = 1;
+
+      // Determine which sheet to use based on the ID prefix
+      if (uniqueId.startsWith("ACT-")) {
+        sheet = logSheet;
+        endCol = 5;
+        durCol = 6;
+      } else if (uniqueId.startsWith("BRK-")) {
+        sheet = breakLogSheet;
+        endCol = 6;
+        durCol = 7;
+      } else {
+        throw new Error("Invalid Unique ID prefix.");
+      }
+
+      const uniqueIdColumn = sheet.getRange("B2:B" + sheet.getLastRow()).getValues().flat();
+      const rowIndex = uniqueIdColumn.indexOf(uniqueId);
+
+      if (rowIndex !== -1) {
+        const rowNumber = rowIndex + 2;
+        const startTime = new Date(sheet.getRange(rowNumber, startTimeCol).getValue());
+        const endTimeValue = sheet.getRange(rowNumber, endCol).getValue();
+
+        // Only proceed if there is an end time
+        if (endTimeValue) {
+          const endTime = new Date(endTimeValue);
+          const newDuration = formatDuration(endTime - startTime);
+          sheet.getRange(rowNumber, durCol).setValue(newDuration);
+          return { success: true, message: `Row ${uniqueId} synced successfully. New duration: ${newDuration}` };
+        } else {
+          return { success: false, message: `Row ${uniqueId} is still live. Cannot sync.` };
+        }
+      } else {
+        throw new Error(`Unique ID ${uniqueId} not found in the sheet.`);
+      }
+    } catch (e) {
+      Logger.log("Error in syncRowById: " + e.toString());
+      return { success: false, error: "Sync failed: " + e.message };
+    }
+  }
+
+
+  function startActivity(activityName) { return startAction('Activity', activityName); }
+  function finishActivity(uniqueId) { return finishAction('Activity', uniqueId); }
+  function startBreak(breakReason, comment) { return startAction('Break', breakReason, comment); }
+  function endBreak(uniqueId) { return finishAction('Break', uniqueId); }
+
+  // --- OTHER FUNCTIONS ---
+  function getActivities() { return validationSheet.getRange("A2:A" + validationSheet.getLastRow()).getValues().flat().filter(String); }
+  function getBreakReasons() { return validationSheet.getRange("E2:E" + validationSheet.getLastRow()).getValues().flat().filter(String); }
+  function validateSupervisor(u,p){const d=accessSheet.getRange("B2:D"+accessSheet.getLastRow()).getValues();for(const r of d){if(r[0]===u&&r[1].toString()===p.toString()&&r[2]==="Yes")return{success:!0,name:u}}return{success:!1,message:"Invalid credentials or access denied. Please reach out to John Messiah."}}
+  function getSupervisorDashboardData(){const d=logSheet.getDataRange().getValues();return{liveActivities:d.filter(r=>r[4]==='').map(r=>({email:r[2],activity:r[3],startTime:formatDate(new Date(r[0]))}))}}
+  function getAllLogData(){const d=logSheet.getDataRange().getValues();const h=d.shift();const f=d.map(r=>[formatDate(new Date(r[0])),r[1],r[2],r[3],r[4]?formatDate(new Date(r[4])):"",r[5]]);return[h,...f]}
+  function updateLogBySupervisor(l){const u=l.uniqueId;const d=logSheet.getDataRange().getValues();for(let i=1;i<d.length;i++){if(d[i][1]===u){const r=i+1;const s=new Date(l.start);const e=l.end?new Date(l.end):'';logSheet.getRange(r,1).setValue(s);logSheet.getRange(r,4).setValue(l.activity);logSheet.getRange(r,5).setValue(e);if(e)logSheet.getRange(r,6).setValue(formatDuration(e-s));else logSheet.getRange(r,6).setValue('');return{success:!0,message:`Log ${u} updated successfully.`}}}return{success:!1,message:'Log not found.'}}
+  function addLogBySupervisor(l){const t=new Date(l.start);const e=l.end?new Date(l.end):'';let d='';if(e)d=formatDuration(e-t);logSheet.appendRow([t,"MAN-"+t.getTime(),l.email,l.activity,e,d]);return{success:!0,message:`New log added for ${l.email}.`}}
+  function getReport(t,s,e){const a=new Date(s);a.setHours(0,0,0,0);const o=new Date(e);o.setHours(23,59,59,999);let n,r;if(t==="Activity"){n=logSheet.getRange("A1:F1").getDisplayValues()[0];r=logSheet.getDataRange().getValues().slice(1)}else if(t==="Break"){n=breakLogSheet.getRange("A1:G1").getDisplayValues()[0];r=breakLogSheet.getDataRange().getValues().slice(1)}else return{error:"Invalid report type."};const i=r.filter(r=>{const d=new Date(r[0]);return d>=a&&d<=o}).map(r=>(r[0]=formatDate(new Date(r[0])),t==='Activity'&&r[4]&&(r[4]=formatDate(new Date(r[4]))),t==='Break'&&r[5]&&(r[5]=formatDate(new Date(r[5]))),r));return{headers:n,data:i}}
