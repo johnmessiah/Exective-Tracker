@@ -1,1056 +1,528 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
-  <base target="_top">
-
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
- 
-
-  <style>
-
-    /* --- THEME & COLOR PALETTE --- */
-
-    :root {
-
-      --light-bg: #f8f9fa; --light-surface: #ffffff; --light-primary: #2563eb; --light-on-primary: #ffffff; --light-font: #1f2937; --light-font-secondary: #6b7280; --light-border: #d1d5db;
-
-      --dark-bg: #111827; --dark-surface: #1f2937; --dark-primary: #3b82f6; --dark-on-primary: #ffffff; --dark-font: #d1d5db; --dark-font-secondary: #9ca3af; --dark-border: #374151;
-
-      --green: #22c55e; --red: #ef4444; --yellow: #eab308;
-
-      --green-bg-light: #dcfce7; --green-text-light: #15803d; --red-bg-light: #fee2e2; --red-text-light: #b91c1c; --yellow-bg-light: #fef9c3; --yellow-text-light: #a16207;
-
-      --green-bg-dark: #166534; --green-text-dark: #bbf7d0; --red-bg-dark: #991b1b; --red-text-dark: #fecaca; --yellow-bg-dark: #854d0e; --yellow-text-dark: #fef08a;
-
-    }
-
-    body.light-mode {
-
-      --bg-color: var(--light-bg); --surface-color: var(--light-surface); --primary-color: var(--light-primary); --on-primary-color: var(--light-on-primary); --font-color: var(--light-font); --font-secondary-color: var(--light-font-secondary); --border-color: var(--light-border);
-
-      --green-bg: var(--green-bg-light); --green-text: var(--green-text-light); --red-bg: var(--red-bg-light); --red-text: var(--red-text-light); --yellow-bg: var(--yellow-bg-light); --yellow-text: var(--yellow-text-light);
-
-    }
-
-    body.dark-mode {
-
-      --bg-color: var(--dark-bg); --surface-color: var(--dark-surface); --primary-color: var(--dark-primary); --on-primary-color: var(--dark-on-primary); --font-color: var(--dark-font); --font-secondary-color: var(--dark-font-secondary); --border-color: var(--dark-border);
-
-      --green-bg: var(--green-bg-dark); --green-text: var(--green-text-dark); --red-bg: var(--red-bg-dark); --red-text: var(--red-text-dark); --yellow-bg: var(--yellow-bg-dark); --yellow-text: var(--yellow-text-dark);
-
-    }
-
-    /* --- BASE & LAYOUT --- */
-
-    body { font-family: 'Roboto', Arial, sans-serif; background-color: var(--bg-color); color: var(--font-color); margin: 0; display: flex; flex-direction: column; min-height: 100vh; transition: background-color 0.3s, color 0.3s; }
-
-    main { flex-grow: 1; padding: 20px; }
-
-    .page-container { display: none; max-width: 1280px; margin: 0 auto; }
-
-    .content-wrapper { display: flex; flex-direction: column; min-height: 100vh; }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    .animate-fadeIn { animation: fadeIn 0.5s ease-in-out; }
-
-   
-
-    /* --- HEADER & FOOTER --- */
-
-    .header { background-color: var(--surface-color); box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; transition: background-color 0.3s; }
-
-    .header h1 { font-size: 20px; font-weight: bold; color: var(--primary-color); margin: 0; }
-
-    .nav-links { display: flex; align-items: center; gap: 24px; }
-
-    .nav-links a { text-decoration: none; color: var(--font-color); font-weight: 500; transition: color 0.2s; padding: 8px 0; border-bottom: 2px solid transparent; }
-
-    .nav-links a.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
-
-    .nav-links a:hover { color: var(--primary-color); }
-
-    .theme-toggle { cursor: pointer; font-size: 20px; color: var(--font-secondary-color); transition: color 0.2s; }
-
-    .theme-toggle:hover { color: var(--primary-color); }
-
-    .footer { text-align: center; padding: 20px; font-size: 14px; color: var(--font-secondary-color); margin-top: auto; }
-
-    .footer a { color: var(--primary-color); text-decoration: none; }
-
-    .footer a:hover { text-decoration: underline; }
-
-   
-
-    /* --- CARD COMPONENT --- */
-
-    .card { background-color: var(--surface-color); border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); padding: 24px; transition: background-color 0.3s; margin-bottom: 24px; }
-
-    .card-title { font-size: 20px; font-weight: bold; margin-top: 0; margin-bottom: 16px; color: var(--font-color); }
-
-
-
-    /* --- FORM ELEMENTS & BUTTONS --- */
-
-    button { font-size: 14px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s; padding: 10px 20px; }
-
-    button:active { transform: translateY(1px); }
-
-    button:disabled { cursor: not-allowed; opacity: 0.5; }
-
-    .btn-primary { background-color: var(--primary-color); color: var(--on-primary-color); }
-
-    .btn-primary:hover:not(:disabled) { background-color: #1d4ed8; }
-
-    body.dark-mode .btn-primary:hover:not(:disabled) { background-color: #60a5fa; }
-
-    .btn-green { background-color: var(--green); color: white; }
-
-    .btn-green:hover:not(:disabled) { background-color: #16a34a; }
-
-    .btn-red { background-color: var(--red); color: white; }
-
-    .btn-red:hover:not(:disabled) { background-color: #dc2626; }
-
-    .btn-yellow { background-color: var(--yellow); color: white; }
-
-    .btn-yellow:hover:not(:disabled) { background-color: #ca8a04; }
-
-
-
-    select, input[type="text"], input[type="date"] { width: 100%; padding: 10px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--font-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: 0.3s; }
-
-    select:focus, input:focus { outline: 2px solid var(--primary-color); border-color: transparent; }
-
-   
-
-    /* --- TABLE --- */
-
-    .table-container { max-height: 384px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; }
-
-    table { width: 100%; border-collapse: collapse; text-align: left; }
-
-    th, td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
-
-    th { background-color: #f9fafb; color: var(--font-secondary-color); font-weight: 600; text-transform: uppercase; font-size: 12px; position: sticky; top: 0; z-index: 10;}
-
-    body.dark-mode th { background-color: #374151; }
-
-    tbody tr:last-child td { border-bottom: none; }
-
-    .empty-row td { text-align: center; padding: 32px; color: var(--font-secondary-color); }
-
-
-
-    /* --- SPECIFIC PAGES & COMPONENTS --- */
-
-    #status-banner { padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 24px; font-weight: 500; display: none; }
-
-    .status-success { background-color: var(--green-bg); color: var(--green-text); }
-
-    .status-error { background-color: var(--red-bg); color: var(--red-text); }
-
-    .status-wait { background-color: var(--yellow-bg); color: var(--yellow-text); }
-
-    .main-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
-
-    @media (min-width: 1024px) { .main-grid { grid-template-columns: 1fr 1fr; } }
-
-
-
-    /* Supervisor Page */
-
-    .login-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-
-    .login-modal.active { display: flex; }
-
-    #live-status-content { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
-
-    .live-user-card { padding: 16px; border-radius: 8px; background-color: var(--green-bg); color: var(--green-text); }
-
-    .live-user-card .name { font-weight: bold; font-size: 1.1em; }
-
-    .live-user-card .break-info { font-family: monospace; font-size: 1.1em; margin-top: 8px; }
-
-   
-
-    /* Report Page */
-
-    .report-controls { display: grid; grid-template-columns: 1fr; gap: 16px; }
-
-    @media (min-width: 768px) { .report-controls { grid-template-columns: 1fr 1fr auto; align-items: end; } }
-
-    .report-table-container { max-height: 60vh; overflow-y: auto; }
-
-    #download-area { display: flex; justify-content: flex-end; gap: 10px; }
-
-  </style>
-
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <style>
+    /* --- THEME & COLOR PALETTE --- */
+    :root {
+      --light-bg: #f8f9fa; --light-surface: #ffffff; --light-primary: #2563eb; --light-on-primary: #ffffff; --light-font: #1f2937; --light-font-secondary: #6b7280; --light-border: #d1d5db;
+      --dark-bg: #111827; --dark-surface: #1f2937; --dark-primary: #3b82f6; --dark-on-primary: #ffffff; --dark-font: #d1d5db; --dark-font-secondary: #9ca3af; --dark-border: #374151;
+      --green: #22c55e; --red: #ef4444; --yellow: #eab308;
+      --green-bg-light: #dcfce7; --green-text-light: #15803d; --red-bg-light: #fee2e2; --red-text-light: #b91c1c; --yellow-bg-light: #fef9c3; --yellow-text-light: #a16207;
+      --green-bg-dark: #166534; --green-text-dark: #bbf7d0; --red-bg-dark: #991b1b; --red-text-dark: #fecaca; --yellow-bg-dark: #854d0e; --yellow-text-dark: #fef08a;
+    }
+    body.light-mode {
+      --bg-color: var(--light-bg); --surface-color: var(--light-surface); --primary-color: var(--light-primary); --on-primary-color: var(--light-on-primary); --font-color: var(--light-font); --font-secondary-color: var(--light-font-secondary); --border-color: var(--light-border);
+      --green-bg: var(--green-bg-light); --green-text: var(--green-text-light); --red-bg: var(--red-bg-light); --red-text: var(--red-text-light); --yellow-bg: var(--yellow-bg-light); --yellow-text: var(--yellow-text-light);
+    }
+    body.dark-mode {
+      --bg-color: var(--dark-bg); --surface-color: var(--dark-surface); --primary-color: var(--dark-primary); --on-primary-color: var(--dark-on-primary); --font-color: var(--dark-font); --font-secondary-color: var(--dark-font-secondary); --border-color: var(--dark-border);
+      --green-bg: var(--green-bg-dark); --green-text: var(--green-text-dark); --red-bg: var(--red-bg-dark); --red-text: var(--red-text-dark); --yellow-bg: var(--yellow-bg-dark); --yellow-text: var(--yellow-text-dark);
+    }
+    /* --- BASE & LAYOUT --- */
+    body { font-family: 'Roboto', Arial, sans-serif; background-color: var(--bg-color); color: var(--font-color); margin: 0; display: flex; flex-direction: column; min-height: 100vh; transition: background-color 0.3s, color 0.3s; }
+    main { flex-grow: 1; padding: 20px; }
+    .page-container { display: none; max-width: 1280px; margin: 0 auto; }
+    .content-wrapper { display: flex; flex-direction: column; min-height: 100vh; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fadeIn { animation: fadeIn 0.5s ease-in-out; }
+    
+    /* --- HEADER & FOOTER --- */
+    .header { background-color: var(--surface-color); box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; transition: background-color 0.3s; }
+    .header h1 { font-size: 20px; font-weight: bold; color: var(--primary-color); margin: 0; }
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+    .nav-links a { text-decoration: none; color: var(--font-color); font-weight: 500; transition: color 0.2s; padding: 8px 0; border-bottom: 2px solid transparent; }
+    .nav-links a.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
+    .nav-links a:hover { color: var(--primary-color); }
+    .theme-toggle { cursor: pointer; font-size: 20px; color: var(--font-secondary-color); transition: color 0.2s; }
+    .theme-toggle:hover { color: var(--primary-color); }
+    .footer { text-align: center; padding: 20px; font-size: 14px; color: var(--font-secondary-color); margin-top: auto; }
+    .footer a { color: var(--primary-color); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+    
+    /* --- CARD COMPONENT --- */
+    .card { background-color: var(--surface-color); border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); padding: 24px; transition: background-color 0.3s; margin-bottom: 24px; }
+    .card-title { font-size: 20px; font-weight: bold; margin-top: 0; margin-bottom: 16px; color: var(--font-color); }
+
+    /* --- FORM ELEMENTS & BUTTONS --- */
+    button { font-size: 14px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s; padding: 10px 20px; }
+    button:active { transform: translateY(1px); }
+    button:disabled { cursor: not-allowed; opacity: 0.5; }
+    .btn-primary { background-color: var(--primary-color); color: var(--on-primary-color); }
+    .btn-primary:hover:not(:disabled) { background-color: #1d4ed8; }
+    body.dark-mode .btn-primary:hover:not(:disabled) { background-color: #60a5fa; }
+    .btn-green { background-color: var(--green); color: white; }
+    .btn-green:hover:not(:disabled) { background-color: #16a34a; }
+    .btn-red { background-color: var(--red); color: white; }
+    .btn-red:hover:not(:disabled) { background-color: #dc2626; }
+    .btn-yellow { background-color: var(--yellow); color: white; }
+    .btn-yellow:hover:not(:disabled) { background-color: #ca8a04; }
+
+    select, input[type="text"], input[type="date"] { width: 100%; padding: 10px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--font-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: 0.3s; }
+    select:focus, input:focus { outline: 2px solid var(--primary-color); border-color: transparent; }
+    
+    /* --- TABLE --- */
+    .table-container { max-height: 384px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+    th { background-color: #f9fafb; color: var(--font-secondary-color); font-weight: 600; text-transform: uppercase; font-size: 12px; position: sticky; top: 0; z-index: 10;}
+    body.dark-mode th { background-color: #374151; }
+    tbody tr:last-child td { border-bottom: none; }
+    .empty-row td { text-align: center; padding: 32px; color: var(--font-secondary-color); }
+
+    /* --- SPECIFIC PAGES & COMPONENTS --- */
+    #status-banner { padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 24px; font-weight: 500; display: none; }
+    .status-success { background-color: var(--green-bg); color: var(--green-text); }
+    .status-error { background-color: var(--red-bg); color: var(--red-text); }
+    .status-wait { background-color: var(--yellow-bg); color: var(--yellow-text); }
+    .main-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+    @media (min-width: 1024px) { .main-grid { grid-template-columns: 1fr 1fr; } }
+
+    /* Supervisor Page */
+    .login-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+    .login-modal.active { display: flex; }
+    #live-status-content { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+    .live-user-card { padding: 16px; border-radius: 8px; background-color: var(--green-bg); color: var(--green-text); }
+    .live-user-card .name { font-weight: bold; font-size: 1.1em; }
+    .live-user-card .break-info { font-family: monospace; font-size: 1.1em; margin-top: 8px; }
+    
+    /* Report Page */
+    .report-controls { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 768px) { .report-controls { grid-template-columns: 1fr 1fr auto; align-items: end; } }
+    .report-table-container { max-height: 60vh; overflow-y: auto; }
+    #download-area { display: flex; justify-content: flex-end; gap: 10px; }
+  </style>
 </head>
 
-
-
 <body class="light-mode">
-
-  <div class="content-wrapper">
-
-    <header class="header">
-
-      <h1>Executive Tracker</h1>
-
-      <nav class="nav-links">
-
-        <a href="<?= ScriptApp.getService().getUrl() ?>" id="nav-home">Tracker</a>
-
-        <a href="<?= ScriptApp.getService().getUrl() ?>?page=supervisor" id="nav-supervisor">Supervisor</a>
-
-        <a href="<?= ScriptApp.getService().getUrl() ?>?page=report" id="nav-report">Reports</a>
-
-        <div class="theme-toggle" id="theme-toggle"><i class="fas fa-moon"></i><i class="fas fa-sun" style="display:none;"></i></div>
-
-      </nav>
-
-    </header>
-
-
-
-    <main>
-
-      <div id="status-banner"></div>
-
-
-
-      <!-- ======================= HOME PAGE ======================= -->
-
-      <div id="home" class="page-container animate-fadeIn">
-
-        <div class="main-grid">
-
-          <div class="card">
-
-            <h2 class="card-title">Today's Break Report</h2>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: center;">
-
-              <div>
-
-                <h4 style="font-size: 0.9em; color: var(--font-secondary-color); margin: 0 0 8px 0;">Total Personal Break</h4>
-
-                <p id="personal-break-total" style="font-size: 2em; font-weight: bold; margin:0;">00:00:00</p>
-
-              </div>
-
-              <div>
-
-                <h4 style="font-size: 0.9em; color: var(--font-secondary-color); margin: 0 0 8px 0;">Total Feedback Break</h4>
-
-                <p id="feedback-break-total" style="font-size: 2em; font-weight: bold; margin:0;">00:00:00</p>
-
-              </div>
-
-            </div>
-
-            <div id="live-break-timer-container" style="text-align: center; display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-
-                <p id="live-break-timer" style="font-weight: bold; font-size: 1.2em; color: var(--primary-color); margin:0;"></p>
-
-            </div>
-
-          </div>
-
-          <div class="card" style="position: relative;">
-
-            <h2 class="card-title">Break Controls</h2>
-
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-
-              <select id="break-reason"></select>
-
-              <input type="text" id="break-comment" placeholder="Comment (Optional)">
-
-              <div style="display: flex; gap: 16px;">
-
-                <button id="btn-punch-in" class="btn-green" style="width: 100%;">Punch In</button>
-
-                <button id="btn-punch-out" class="btn-red" style="width: 100%;">Punch Out</button>
-
-              </div>
-
-            </div>
-
-            <div id="break-unique-id" style="position: absolute; bottom: 8px; right: 16px; font-size: 10px; font-family: monospace; color: var(--font-secondary-color);"></div>
-
-          </div>
-
-        </div>
-
-        <div class="card">
-
-          <h2 class="card-title">Today's Break Log</h2>
-
-          <div class="table-container">
-
-            <table>
-
-              <thead><tr><th>Start Time</th><th>End Time</th><th>Reason</th><th>Comment</th><th>Duration</th></tr></thead>
-
-              <tbody id="break-log-table-body"></tbody>
-
-            </table>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- ======================= SUPERVISOR PAGE ======================= -->
-
-      <div id="supervisor" class="page-container animate-fadeIn">
-
-         <div id="supervisor-main-content" style="display: none;">
-
-             <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">Welcome, Supervisor <span id="supervisor-name"></span></h2>
-
-              <div class="card">
-
-                 <h3 class="card-title">Live Break Status</h3>
-
-                 <div id="live-status-content"></div>
-
-               </div>
-
-             <div class="main-grid">
-
-               <div class="card">
-
-                 <h3 class="card-title">Executive Daily Totals</h3>
-
-                 <div class="table-container" style="max-height: 350px;">
-
-                   <table>
-
-                     <thead><tr><th>User</th><th>Personal</th><th>Feedback</th></tr></thead>
-
-                     <tbody id="daily-totals-table-body"></tbody>
-
-                   </table>
-
-                 </div>
-
-               </div>
-
-                <div class="card">
-
-                   <h3 class="card-title">Today's Full Break Log</h3>
-
-                   <div class="table-container" style="max-height: 350px;">
-
-                       <table>
-
-                         <thead><tr><th>User</th><th>Start</th><th>End</th><th>Reason</th><th>Comment</th><th>Duration</th></tr></thead>
-
-                         <tbody id="activity-log-table-body"></tbody>
-
-                       </table>
-
-                   </div>
-
-                 </div>
-
-             </div>
-
-         </div>
-
-         <div id="login-modal" class="login-modal active">
-
-           <div class="card" style="text-align: center; width: 100%; max-width: 400px; animation: fadeIn 0.3s;">
-
-             <h2 class="card-title" style="color: var(--primary-color);">Supervisor Portal</h2>
-
-             <p style="color: var(--font-secondary-color); margin-bottom: 24px;">Please log in to continue.</p>
-
-             <p id="login-error" style="color: var(--red-text); min-height: 20px; margin-bottom: 16px;"></p>
-
-             <button id="login-button" class="btn-primary" style="width: 100%;">Login as Supervisor</button>
-
-           </div>
-
-         </div>
-
-      </div>
-
-     
-
-      <!-- ======================= REPORT PAGE ======================= -->
-
-      <div id="report" class="page-container animate-fadeIn">
-
-        <div class="card">
-
-          <h2 class="card-title">Generate Break Report</h2>
-
-          <div class="report-controls">
-
-            <div>
-
-              <label for="start-date" style="font-size: 14px; font-weight: 500; display: block; margin-bottom: 4px;">Start Date</label>
-
-              <input type="date" id="start-date">
-
-            </div>
-
-            <div>
-
-              <label for="end-date" style="font-size: 14px; font-weight: 500; display: block; margin-bottom: 4px;">End Date</label>
-
-              <input type="date" id="end-date">
-
-            </div>
-
-            <button id="run-report-btn" class="btn-primary">Run Report</button>
-
-          </div>
-
-            <div id="download-area" style="margin-top: 16px;"></div>
-
-        </div>
-
-        <div class="card">
-
-          <h2 class="card-title">Report Results</h2>
-
-          <div id="report-output" class="report-table-container">
-
-            <p style="text-align: center; color: var(--font-secondary-color); padding: 16px;">Please select a date range and click "Run Report".</p>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </main>
-
-
-
-    <footer class="footer">
-
-      <p>Developed By <a href="https://www.linkedin.com/in/johnmessiah" target="_blank">John Messiah</a></p>
-
-    </footer>
-
-  </div>
-
-
-
-  <script>
-
-    // --- GLOBAL STATE & CONFIG ---
-
-    const PAGE = "<?= page ?>";
-
-    let currentBreakInfo = null;
-
-    let isActionInProgress = false;
-
-    let liveTimerInterval = null;
-
-    const supervisorState = { liveTimers: [], refreshInterval: null, timerInterval: null };
-
-
-
-    // --- DOM ELEMENTS & BANNER ---
-
-    const StatusBanner = {
-
-      el: document.getElementById('status-banner'),
-
-      _timeout: null,
-
-      show(type, message, sticky = false) {
-
-        if (!this.el) return;
-
-        clearTimeout(this._timeout);
-
-        this.el.className = `status-${type}`;
-
-        this.el.textContent = message;
-
-        this.el.style.display = 'block';
-
-        if (!sticky) this._timeout = setTimeout(() => this.hide(), 4000);
-
-      },
-
-      hide() { if (this.el) this.el.style.display = 'none'; }
-
-    };
-
-
-
-    // --- UTILITY ---
-
-    function formatTimer(ms) {
-
-      if (isNaN(ms) || ms < 0) return "00:00:00";
-
-      const h = Math.floor(ms / 36e5).toString().padStart(2, '0');
-
-      const m = Math.floor((ms % 36e5) / 6e4).toString().padStart(2, '0');
-
-      const s = Math.floor((ms % 6e4) / 1000).toString().padStart(2, '0');
-
-      return `${h}:${m}:${s}`;
-
-    }
-
-
-
-    // --- THEME ---
-
-    function setupTheme() {
-
-      const toggle = document.getElementById('theme-toggle');
-
-      const moonIcon = toggle.querySelector('.fa-moon');
-
-      const sunIcon = toggle.querySelector('.fa-sun');
-
-      const applyTheme = (theme) => {
-
-        document.body.className = theme === 'dark' ? 'dark-mode' : 'light-mode';
-
-        moonIcon.style.display = theme === 'dark' ? 'none' : 'block';
-
-        sunIcon.style.display = theme === 'dark' ? 'block' : 'none';
-
-        localStorage.setItem('theme', theme);
-
-      };
-
-      toggle.addEventListener('click', () => applyTheme(document.body.classList.contains('light-mode') ? 'dark' : 'light'));
-
-      applyTheme(localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-
-    }
-
-
-
-    // --- TABLE RENDERER ---
-
-    function renderTable(tbody, data, emptyMessage, renderFn) {
-
-        if (!tbody) return;
-
-        tbody.innerHTML = '';
-
-        if (data && data.length > 0) {
-
-            data.forEach(item => {
-
-                const row = tbody.insertRow();
-
-                row.innerHTML = renderFn(item);
-
-            });
-
-        } else {
-
-            const row = tbody.insertRow();
-
-            row.className = 'empty-row';
-
-            const cell = row.insertCell();
-
-            cell.colSpan = 10;
-
-            cell.textContent = emptyMessage;
-
-        }
-
-    }
-
-
-
-    // --- HOME PAGE LOGIC ---
-
-    function setupHomePage() {
-
-      const punchInBtn = document.getElementById('btn-punch-in');
-
-      const punchOutBtn = document.getElementById('btn-punch-out');
-
-      const reasonSelect = document.getElementById('break-reason');
-
-      const commentInput = document.getElementById('break-comment');
-
-      const uniqueIdEl = document.getElementById('break-unique-id');
-
-      const timerContainer = document.getElementById('live-break-timer-container');
-
-
-
-      function updateHomeUI(data) {
-
-        currentBreakInfo = data.currentBreak; // Store the current break info globally
-
-        const isBreakRunning = !!currentBreakInfo;
-
-       
-
-        document.getElementById('personal-break-total').textContent = data.personalBreakTotal || '00:00:00';
-
-        document.getElementById('feedback-break-total').textContent = data.feedbackBreakTotal || '00:00:00';
-
-        renderTable(document.getElementById('break-log-table-body'), data.todayBreakLogs, 'No breaks logged today.', log => `<td>${log.start}</td><td>${log.end}</td><td>${log.reason}</td><td>${log.comment}</td><td>${log.duration}</td>`);
-
-       
-
-        // **STATEFUL UI LOGIC**
-
-        reasonSelect.disabled = isBreakRunning;
-
-        commentInput.disabled = isBreakRunning;
-
-        punchInBtn.disabled = isBreakRunning;
-
-        punchOutBtn.disabled = !isBreakRunning;
-
-
-
-        if (liveTimerInterval) clearInterval(liveTimerInterval);
-
-       
-
-        if (isBreakRunning) {
-
-          reasonSelect.value = currentBreakInfo.reason;
-
-          uniqueIdEl.textContent = `ID: ${currentBreakInfo.uniqueId}`;
-
-          timerContainer.style.display = 'block';
-
-          const timerEl = document.getElementById('live-break-timer');
-
-          const updateTimer = () => {
-
-             timerEl.textContent = `${currentBreakInfo.reason}: ${formatTimer(Date.now() - currentBreakInfo.startTime)}`;
-
-          };
-
-          updateTimer();
-
-          liveTimerInterval = setInterval(updateTimer, 1000);
-
-        } else {
-
-          uniqueIdEl.textContent = '';
-
-          commentInput.value = '';
-
-          if (reasonSelect.options.length > 0) {
-
-            reasonSelect.selectedIndex = 0;
-
-          }
-
-          timerContainer.style.display = 'none';
-
-        }
-
-      }
-
-     
-
-      function handleApiResponse(promise, successMessage) {
-
-        if(isActionInProgress) return;
-
-        isActionInProgress = true;
-
-        StatusBanner.show('wait', 'Processing...');
-
-        promise
-
-          .withSuccessHandler(res => {
-
-            isActionInProgress = false;
-
-            if (res.success) {
-
-              StatusBanner.show('success', successMessage);
-
-              updateHomeUI(res);
-
-            } else {
-
-              StatusBanner.show('error', res.error, true);
-
-            }
-
-          })
-
-          .withFailureHandler(err => {
-
-            isActionInProgress = false;
-
-            StatusBanner.show('error', `An error occurred: ${err.message}`, true);
-
-          });
-
-      }
-
-
-
-      punchInBtn.addEventListener('click', () => {
-
-        if (!reasonSelect.value) {
-
-            StatusBanner.show('error', 'Please select a break reason.');
-
-            return;
-
-        }
-
-        handleApiResponse(google.script.run.startBreak(reasonSelect.value, commentInput.value), 'Break started successfully!');
-
-      });
-
-
-
-      punchOutBtn.addEventListener('click', () => {
-
-        if (!currentBreakInfo || !currentBreakInfo.uniqueId) {
-
-            StatusBanner.show('error', 'No active break to punch out from. Please refresh.');
-
-            return;
-
-        }
-
-        handleApiResponse(google.script.run.endBreak(currentBreakInfo.uniqueId), 'Break ended successfully!');
-
-      });
-
-
-
-      StatusBanner.show('wait', 'Loading data...', true);
-
-      google.script.run.withSuccessHandler(reasons => {
-
-        reasonSelect.innerHTML = '<option value="">Select Break Reason...</option>' + reasons.map(r => `<option value="${r}">${r}</option>`).join('');
-
-        handleApiResponse(google.script.run.getHomePageData(), 'Data loaded');
-
-      }).withFailureHandler(err => {
-
-          StatusBanner.show('error', `Failed to load break reasons: ${err.message}`, true);
-
-      }).getBreakReasons();
-
-    }
-
-
-
-    // --- OTHER PAGES LOGIC (UNCHANGED) ---
-
-    function setupSupervisorPage() {
-
-      const loginModal = document.getElementById('login-modal');
-
-      const mainContent = document.getElementById('supervisor-main-content');
-
-      function updateTimers() {
-
-        supervisorState.liveTimers.forEach((b, i) => {
-
-          const timerEl = document.getElementById(`sv-timer-${i}`);
-
-          if (timerEl) timerEl.textContent = formatTimer(Date.now() - b.startTimeMillis);
-
-        });
-
-      }
-
-      function populateDashboard(data) {
-
-        if (!data.success) {
-
-            document.getElementById('live-status-content').innerHTML = `<p style="color: var(--red-text)">Error: ${data.error}</p>`;
-
-            return;
-
-        }
-
-        supervisorState.liveTimers = data.liveBreaks || [];
-
-        const liveContent = document.getElementById('live-status-content');
-
-        liveContent.innerHTML = '';
-
-        if(supervisorState.liveTimers.length === 0) {
-
-            liveContent.innerHTML = `<p style="color: var(--font-secondary-color); grid-column: 1 / -1;">No executives currently on break.</p>`;
-
-        } else {
-
-            supervisorState.liveTimers.forEach((b, i) => {
-
-                const card = document.createElement('div');
-
-                card.className = 'live-user-card';
-
-                card.innerHTML = `<div class="name">${b.user}</div><div class="break-info">${b.reason}: <span id="sv-timer-${i}"></span></div>`;
-
-                liveContent.appendChild(card);
-
-            });
-
-        }
-
-        updateTimers();
-
-        renderTable(document.getElementById('daily-totals-table-body'), data.breakTotals, 'No completed breaks today.', t => `<td>${t.user}</td><td>${t.personal}</td><td>${t.feedback}</td>`);
-
-        renderTable(document.getElementById('activity-log-table-body'), data.allTodayLogs, 'No activity recorded today.', l => `<td>${l.user}</td><td>${l.start}</td><td>${l.end}</td><td>${l.reason}</td><td>${l.comment}</td><td>${l.duration}</td>`);
-
-      }
-
-      function refreshDashboard() { google.script.run.withSuccessHandler(populateDashboard).getSupervisorDashboardData(); }
-
-      document.getElementById('login-button').addEventListener('click', (e) => {
-
-        const btn = e.target;
-
-        btn.disabled = true; btn.textContent = 'Verifying...';
-
-        document.getElementById('login-error').textContent = '';
-
-        google.script.run
-
-          .withSuccessHandler(res => {
-
-            if (res.success) {
-
-              loginModal.classList.remove('active');
-
-              mainContent.style.display = 'block';
-
-              document.getElementById('supervisor-name').textContent = res.name;
-
-              refreshDashboard();
-
-              if (supervisorState.refreshInterval) clearInterval(supervisorState.refreshInterval);
-
-              if (supervisorState.timerInterval) clearInterval(supervisorState.timerInterval);
-
-              supervisorState.refreshInterval = setInterval(refreshDashboard, 30000);
-
-              supervisorState.timerInterval = setInterval(updateTimers, 1000);
-
-            } else {
-
-              document.getElementById('login-error').textContent = res.message;
-
-              btn.disabled = false; btn.textContent = 'Login as Supervisor';
-
-            }
-
-          })
-
-          .checkSupervisorAccess();
-
-      });
-
-    }
-
-
-
-    function setupReportPage() {
-
-      const startDateEl = document.getElementById('start-date');
-
-      const endDateEl = document.getElementById('end-date');
-
-      const runBtn = document.getElementById('run-report-btn');
-
-      const outputDiv = document.getElementById('report-output');
-
-      const downloadArea = document.getElementById('download-area');
-
-      const today = new Date().toISOString().split('T')[0];
-
-      startDateEl.value = today;
-
-      endDateEl.value = today;
-
-      const runReport = () => {
-
-        runBtn.disabled = true; runBtn.textContent = 'Running...';
-
-        outputDiv.innerHTML = `<p style="text-align:center;">Loading report...</p>`;
-
-        downloadArea.innerHTML = '';
-
-        google.script.run
-
-          .withSuccessHandler(result => {
-
-            runBtn.disabled = false; runBtn.textContent = 'Run Report';
-
-            outputDiv.innerHTML = '';
-
-            const table = document.createElement('table');
-
-            const thead = table.createTHead();
-
-            const headerRow = thead.insertRow();
-
-            result.headers.forEach(h => headerRow.innerHTML += `<th>${h}</th>`);
-
-            table.appendChild(thead);
-
-            outputDiv.appendChild(table);
-
-            renderTable(table.createTBody(), result.data, 'No data found for the selected range.', row => row.map(cell => `<td>${cell || ''}</td>`).join(''));
-
-            if (result.success && result.data.length > 0) {
-
-                 downloadArea.innerHTML = `<button id="download-csv-btn" class="btn-green">Download as CSV</button><button id="download-sheet-btn" class="btn-yellow">Download as Google Sheet</button>`;
-
-                 document.getElementById('download-sheet-btn').addEventListener('click', () => handleSheetDownload(startDateEl.value, endDateEl.value));
-
-                 document.getElementById('download-csv-btn').addEventListener('click', () => handleCsvDownload(result.headers, result.data));
-
-            } else if (!result.success) {
-
-              outputDiv.innerHTML = `<p style="color:var(--red-text); text-align:center;">${result.error}</p>`;
-
-            }
-
-          })
-
-          .getReport(startDateEl.value, endDateEl.value);
-
-      };
-
-      runBtn.addEventListener('click', runReport);
-
-      function handleSheetDownload(startDate, endDate) {
-
-        const btn = document.getElementById('download-sheet-btn');
-
-        btn.disabled = true; btn.textContent = 'Generating...';
-
-        google.script.run
-
-          .withSuccessHandler(res => {
-
-            if (res.success) {
-
-                btn.textContent = 'Sheet Created!';
-
-                btn.className = 'btn-green';
-
-                btn.disabled = true;
-
-            } else {
-
-                StatusBanner.show('error', res.error, true);
-
-                btn.disabled = false; btn.textContent = 'Download as Google Sheet';
-
-            }
-
-          })
-
-          .createReportAsSheet(startDate, endDate);
-
-      }
-
-      function handleCsvDownload(headers, data) {
-
-          const escapeCsvCell = (cell) => `"${(cell || "").toString().replace(/"/g, '""')}"`;
-
-          const headerRow = headers.map(escapeCsvCell).join(',');
-
-          const dataRows = data.map(row => row.map(escapeCsvCell).join(','));
-
-          const csvContent = "data:text/csv;charset=utf-8," + [headerRow, ...dataRows].join("\n");
-
-          const encodedUri = encodeURI(csvContent);
-
-          const link = document.createElement("a");
-
-          link.setAttribute("href", encodedUri);
-
-          link.setAttribute("download", `break_report_${startDateEl.value}_to_${endDateEl.value}.csv`);
-
-          document.body.appendChild(link);
-
-          link.click();
-
-          document.body.removeChild(link);
-
-      }
-
-    }
-
-
-
-    // --- INITIALIZATION & ROUTING ---
-
-    document.addEventListener('DOMContentLoaded', () => {
-
-      setupTheme();
-
-      const pageToShow = document.getElementById(PAGE);
-
-      if (pageToShow) {
-
-        pageToShow.style.display = 'block';
-
-        const navLink = document.getElementById(`nav-${PAGE}`);
-
-        if(navLink) navLink.classList.add('active');
-
-       
-
-        switch (PAGE) {
-
-          case 'home': setupHomePage(); break;
-
-          case 'supervisor': setupSupervisorPage(); break;
-
-          case 'report': setupReportPage(); break;
-
-        }
-
-      } else {
-
-        document.getElementById('home').style.display = 'block';
-
-        document.getElementById('nav-home').classList.add('active');
-
-        setupHomePage();
-
-      }
-
-    });
-
-  </script>
-
+  <div class="content-wrapper">
+    <header class="header">
+      <h1>Executive Tracker</h1>
+      <nav class="nav-links">
+        <a href="<?= ScriptApp.getService().getUrl() ?>" id="nav-home">Tracker</a>
+        <a href="<?= ScriptApp.getService().getUrl() ?>?page=supervisor" id="nav-supervisor">Supervisor</a>
+        <a href="<?= ScriptApp.getService().getUrl() ?>?page=report" id="nav-report">Reports</a>
+        <div class="theme-toggle" id="theme-toggle"><i class="fas fa-moon"></i><i class="fas fa-sun" style="display:none;"></i></div>
+      </nav>
+    </header>
+
+    <main>
+      <div id="status-banner"></div>
+
+      <!-- ======================= HOME PAGE ======================= -->
+      <div id="home" class="page-container animate-fadeIn">
+        <div class="main-grid">
+          <div class="card">
+            <h2 class="card-title">Today's Break Report</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: center;">
+              <div>
+                <h4 style="font-size: 0.9em; color: var(--font-secondary-color); margin: 0 0 8px 0;">Total Personal Break</h4>
+                <p id="personal-break-total" style="font-size: 2em; font-weight: bold; margin:0;">00:00:00</p>
+              </div>
+              <div>
+                <h4 style="font-size: 0.9em; color: var(--font-secondary-color); margin: 0 0 8px 0;">Total Feedback Break</h4>
+                <p id="feedback-break-total" style="font-size: 2em; font-weight: bold; margin:0;">00:00:00</p>
+              </div>
+            </div>
+            <div id="live-break-timer-container" style="text-align: center; display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                <p id="live-break-timer" style="font-weight: bold; font-size: 1.2em; color: var(--primary-color); margin:0;"></p>
+            </div>
+          </div>
+          <div class="card" style="position: relative;">
+            <h2 class="card-title">Break Controls</h2>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              <select id="break-reason"></select>
+              <input type="text" id="break-comment" placeholder="Comment (Optional)">
+              <div style="display: flex; gap: 16px;">
+                <button id="btn-punch-in" class="btn-green" style="width: 100%;">Punch In</button>
+                <button id="btn-punch-out" class="btn-red" style="width: 100%;">Punch Out</button>
+              </div>
+            </div>
+            <div id="break-unique-id" style="position: absolute; bottom: 8px; right: 16px; font-size: 10px; font-family: monospace; color: var(--font-secondary-color);"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="card-title">Today's Break Log</h2>
+          <div class="table-container">
+            <table>
+              <thead><tr><th>Start Time</th><th>End Time</th><th>Reason</th><th>Comment</th><th>Duration</th></tr></thead>
+              <tbody id="break-log-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================= SUPERVISOR PAGE ======================= -->
+      <div id="supervisor" class="page-container animate-fadeIn">
+         <div id="supervisor-main-content" style="display: none;">
+             <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">Welcome, Supervisor <span id="supervisor-name"></span></h2>
+              <div class="card">
+                 <h3 class="card-title">Live Break Status</h3>
+                 <div id="live-status-content"></div>
+               </div>
+             <div class="main-grid">
+               <div class="card">
+                 <h3 class="card-title">Executive Daily Totals</h3>
+                 <div class="table-container" style="max-height: 350px;">
+                   <table>
+                     <thead><tr><th>User</th><th>Personal</th><th>Feedback</th></tr></thead>
+                     <tbody id="daily-totals-table-body"></tbody>
+                   </table>
+                 </div>
+               </div>
+                 <div class="card">
+                   <h3 class="card-title">Today's Full Break Log</h3>
+                   <div class="table-container" style="max-height: 350px;">
+                       <table>
+                         <thead><tr><th>User</th><th>Start</th><th>End</th><th>Reason</th><th>Comment</th><th>Duration</th></tr></thead>
+                         <tbody id="activity-log-table-body"></tbody>
+                       </table>
+                   </div>
+                 </div>
+             </div>
+         </div>
+         <div id="login-modal" class="login-modal active">
+           <div class="card" style="text-align: center; width: 100%; max-width: 400px; animation: fadeIn 0.3s;">
+             <h2 class="card-title" style="color: var(--primary-color);">Supervisor Portal</h2>
+             <p style="color: var(--font-secondary-color); margin-bottom: 24px;">Please log in to continue.</p>
+             <p id="login-error" style="color: var(--red-text); min-height: 20px; margin-bottom: 16px;"></p>
+             <button id="login-button" class="btn-primary" style="width: 100%;">Login as Supervisor</button>
+           </div>
+         </div>
+      </div>
+      
+      <!-- ======================= REPORT PAGE ======================= -->
+      <div id="report" class="page-container animate-fadeIn">
+        <div class="card">
+          <h2 class="card-title">Generate Break Report</h2>
+          <div class="report-controls">
+            <div>
+              <label for="start-date" style="font-size: 14px; font-weight: 500; display: block; margin-bottom: 4px;">Start Date</label>
+              <input type="date" id="start-date">
+            </div>
+            <div>
+              <label for="end-date" style="font-size: 14px; font-weight: 500; display: block; margin-bottom: 4px;">End Date</label>
+              <input type="date" id="end-date">
+            </div>
+            <button id="run-report-btn" class="btn-primary">Run Report</button>
+          </div>
+            <div id="download-area" style="margin-top: 16px;"></div>
+        </div>
+        <div class="card">
+          <h2 class="card-title">Report Results</h2>
+          <div id="report-output" class="report-table-container">
+            <p style="text-align: center; color: var(--font-secondary-color); padding: 16px;">Please select a date range and click "Run Report".</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>Developed By <a href="https://www.linkedin.com/in/johnmessiah" target="_blank">John Messiah</a></p>
+    </footer>
+  </div>
+
+  <script>
+    // --- GLOBAL STATE & CONFIG ---
+    const PAGE = "<?= page ?>";
+    let currentBreakInfo = null;
+    let isActionInProgress = false;
+    let liveTimerInterval = null;
+    const supervisorState = { liveTimers: [], refreshInterval: null, timerInterval: null };
+
+    // --- DOM ELEMENTS & BANNER ---
+    const StatusBanner = {
+      el: document.getElementById('status-banner'),
+      _timeout: null,
+      show(type, message, sticky = false) {
+        if (!this.el) return;
+        clearTimeout(this._timeout);
+        this.el.className = `status-${type}`;
+        this.el.textContent = message;
+        this.el.style.display = 'block';
+        if (!sticky) this._timeout = setTimeout(() => this.hide(), 4000);
+      },
+      hide() { if (this.el) this.el.style.display = 'none'; }
+    };
+
+    // --- UTILITY ---
+    function formatTimer(ms) {
+      if (isNaN(ms) || ms < 0) return "00:00:00";
+      const h = Math.floor(ms / 36e5).toString().padStart(2, '0');
+      const m = Math.floor((ms % 36e5) / 6e4).toString().padStart(2, '0');
+      const s = Math.floor((ms % 6e4) / 1000).toString().padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    // --- THEME ---
+    function setupTheme() {
+      const toggle = document.getElementById('theme-toggle');
+      const moonIcon = toggle.querySelector('.fa-moon');
+      const sunIcon = toggle.querySelector('.fa-sun');
+      const applyTheme = (theme) => {
+        document.body.className = theme === 'dark' ? 'dark-mode' : 'light-mode';
+        moonIcon.style.display = theme === 'dark' ? 'none' : 'block';
+        sunIcon.style.display = theme === 'dark' ? 'block' : 'none';
+        localStorage.setItem('theme', theme);
+      };
+      toggle.addEventListener('click', () => applyTheme(document.body.classList.contains('light-mode') ? 'dark' : 'light'));
+      applyTheme(localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+    }
+
+    // --- TABLE RENDERER ---
+    function renderTable(tbody, data, emptyMessage, renderFn) {
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        if (data && data.length > 0) {
+            data.forEach(item => {
+                const row = tbody.insertRow();
+                row.innerHTML = renderFn(item);
+            });
+        } else {
+            const row = tbody.insertRow();
+            row.className = 'empty-row';
+            const cell = row.insertCell();
+            cell.colSpan = 10;
+            cell.textContent = emptyMessage;
+        }
+    }
+
+    // --- HOME PAGE LOGIC ---
+    function setupHomePage() {
+      const punchInBtn = document.getElementById('btn-punch-in');
+      const punchOutBtn = document.getElementById('btn-punch-out');
+      const reasonSelect = document.getElementById('break-reason');
+      const commentInput = document.getElementById('break-comment');
+      const uniqueIdEl = document.getElementById('break-unique-id');
+      const timerContainer = document.getElementById('live-break-timer-container');
+
+      function updateHomeUI(data) {
+        currentBreakInfo = data.currentBreak; // Store the current break info globally
+        const isBreakRunning = !!currentBreakInfo;
+        
+        document.getElementById('personal-break-total').textContent = data.personalBreakTotal || '00:00:00';
+        document.getElementById('feedback-break-total').textContent = data.feedbackBreakTotal || '00:00:00';
+        renderTable(document.getElementById('break-log-table-body'), data.todayBreakLogs, 'No breaks logged today.', log => `<td>${log.start}</td><td>${log.end}</td><td>${log.reason}</td><td>${log.comment}</td><td>${log.duration}</td>`);
+        
+        // **STATEFUL UI LOGIC**
+        reasonSelect.disabled = isBreakRunning;
+        commentInput.disabled = isBreakRunning;
+        punchInBtn.disabled = isBreakRunning;
+        punchOutBtn.disabled = !isBreakRunning;
+
+        if (liveTimerInterval) clearInterval(liveTimerInterval);
+        
+        if (isBreakRunning) {
+          reasonSelect.value = currentBreakInfo.reason;
+          uniqueIdEl.textContent = `ID: ${currentBreakInfo.uniqueId}`;
+          timerContainer.style.display = 'block';
+          const timerEl = document.getElementById('live-break-timer');
+          const updateTimer = () => {
+             timerEl.textContent = `${currentBreakInfo.reason}: ${formatTimer(Date.now() - currentBreakInfo.startTime)}`;
+          };
+          updateTimer();
+          liveTimerInterval = setInterval(updateTimer, 1000);
+        } else {
+          uniqueIdEl.textContent = '';
+          commentInput.value = '';
+          if (reasonSelect.options.length > 0) {
+            reasonSelect.selectedIndex = 0;
+          }
+          timerContainer.style.display = 'none';
+        }
+      }
+      
+      function handleApiResponse(promise, successMessage) {
+        if(isActionInProgress) return;
+        isActionInProgress = true;
+        StatusBanner.show('wait', 'Processing...');
+        promise
+          .withSuccessHandler(res => {
+            isActionInProgress = false;
+            if (res.success) {
+              StatusBanner.show('success', successMessage);
+              updateHomeUI(res);
+            } else {
+              StatusBanner.show('error', res.error, true);
+            }
+          })
+          .withFailureHandler(err => {
+            isActionInProgress = false;
+            StatusBanner.show('error', `An error occurred: ${err.message}`, true);
+          });
+      }
+
+      punchInBtn.addEventListener('click', () => {
+        if (!reasonSelect.value) {
+            StatusBanner.show('error', 'Please select a break reason.');
+            return;
+        }
+        handleApiResponse(google.script.run.startBreak(reasonSelect.value, commentInput.value), 'Break started successfully!');
+      });
+
+      punchOutBtn.addEventListener('click', () => {
+        if (!currentBreakInfo || !currentBreakInfo.uniqueId) {
+            StatusBanner.show('error', 'No active break to punch out from. Please refresh.');
+            return;
+        }
+        handleApiResponse(google.script.run.endBreak(currentBreakInfo.uniqueId), 'Break ended successfully!');
+      });
+
+      StatusBanner.show('wait', 'Loading data...', true);
+      google.script.run.withSuccessHandler(reasons => {
+        reasonSelect.innerHTML = '<option value="">Select Break Reason...</option>' + reasons.map(r => `<option value="${r}">${r}</option>`).join('');
+        handleApiResponse(google.script.run.getHomePageData(), 'Data loaded');
+      }).withFailureHandler(err => {
+          StatusBanner.show('error', `Failed to load break reasons: ${err.message}`, true);
+      }).getBreakReasons();
+    }
+
+    // --- OTHER PAGES LOGIC (UNCHANGED) ---
+    function setupSupervisorPage() {
+      const loginModal = document.getElementById('login-modal');
+      const mainContent = document.getElementById('supervisor-main-content');
+      function updateTimers() {
+        supervisorState.liveTimers.forEach((b, i) => {
+          const timerEl = document.getElementById(`sv-timer-${i}`);
+          if (timerEl) timerEl.textContent = formatTimer(Date.now() - b.startTimeMillis);
+        });
+      }
+      function populateDashboard(data) {
+        if (!data.success) {
+            document.getElementById('live-status-content').innerHTML = `<p style="color: var(--red-text)">Error: ${data.error}</p>`;
+            return;
+        }
+        supervisorState.liveTimers = data.liveBreaks || [];
+        const liveContent = document.getElementById('live-status-content');
+        liveContent.innerHTML = '';
+        if(supervisorState.liveTimers.length === 0) {
+            liveContent.innerHTML = `<p style="color: var(--font-secondary-color); grid-column: 1 / -1;">No executives currently on break.</p>`;
+        } else {
+            supervisorState.liveTimers.forEach((b, i) => {
+                const card = document.createElement('div');
+                card.className = 'live-user-card';
+                card.innerHTML = `<div class="name">${b.user}</div><div class="break-info">${b.reason}: <span id="sv-timer-${i}"></span></div>`;
+                liveContent.appendChild(card);
+            });
+        }
+        updateTimers();
+        renderTable(document.getElementById('daily-totals-table-body'), data.breakTotals, 'No completed breaks today.', t => `<td>${t.user}</td><td>${t.personal}</td><td>${t.feedback}</td>`);
+        renderTable(document.getElementById('activity-log-table-body'), data.allTodayLogs, 'No activity recorded today.', l => `<td>${l.user}</td><td>${l.start}</td><td>${l.end}</td><td>${l.reason}</td><td>${l.comment}</td><td>${l.duration}</td>`);
+      }
+      function refreshDashboard() { google.script.run.withSuccessHandler(populateDashboard).getSupervisorDashboardData(); }
+      document.getElementById('login-button').addEventListener('click', (e) => {
+        const btn = e.target;
+        btn.disabled = true; btn.textContent = 'Verifying...';
+        document.getElementById('login-error').textContent = '';
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res.success) {
+              loginModal.classList.remove('active');
+              mainContent.style.display = 'block';
+              document.getElementById('supervisor-name').textContent = res.name;
+              refreshDashboard();
+              if (supervisorState.refreshInterval) clearInterval(supervisorState.refreshInterval);
+              if (supervisorState.timerInterval) clearInterval(supervisorState.timerInterval);
+              supervisorState.refreshInterval = setInterval(refreshDashboard, 30000);
+              supervisorState.timerInterval = setInterval(updateTimers, 1000);
+            } else {
+              document.getElementById('login-error').textContent = res.message;
+              btn.disabled = false; btn.textContent = 'Login as Supervisor';
+            }
+          })
+          .checkSupervisorAccess();
+      });
+    }
+
+    function setupReportPage() {
+      const startDateEl = document.getElementById('start-date');
+      const endDateEl = document.getElementById('end-date');
+      const runBtn = document.getElementById('run-report-btn');
+      const outputDiv = document.getElementById('report-output');
+      const downloadArea = document.getElementById('download-area');
+      const today = new Date().toISOString().split('T')[0];
+      startDateEl.value = today;
+      endDateEl.value = today;
+      const runReport = () => {
+        runBtn.disabled = true; runBtn.textContent = 'Running...';
+        outputDiv.innerHTML = `<p style="text-align:center;">Loading report...</p>`;
+        downloadArea.innerHTML = '';
+        google.script.run
+          .withSuccessHandler(result => {
+            runBtn.disabled = false; runBtn.textContent = 'Run Report';
+            outputDiv.innerHTML = '';
+            const table = document.createElement('table');
+            const thead = table.createTHead();
+            const headerRow = thead.insertRow();
+            result.headers.forEach(h => headerRow.innerHTML += `<th>${h}</th>`);
+            table.appendChild(thead);
+            outputDiv.appendChild(table);
+            renderTable(table.createTBody(), result.data, 'No data found for the selected range.', row => row.map(cell => `<td>${cell || ''}</td>`).join(''));
+            if (result.success && result.data.length > 0) {
+                 downloadArea.innerHTML = `<button id="download-csv-btn" class="btn-green">Download as CSV</button><button id="download-sheet-btn" class="btn-yellow">Download as Google Sheet</button>`;
+                 document.getElementById('download-sheet-btn').addEventListener('click', () => handleSheetDownload(startDateEl.value, endDateEl.value));
+                 document.getElementById('download-csv-btn').addEventListener('click', () => handleCsvDownload(result.headers, result.data));
+            } else if (!result.success) {
+              outputDiv.innerHTML = `<p style="color:var(--red-text); text-align:center;">${result.error}</p>`;
+            }
+          })
+          .getReport(startDateEl.value, endDateEl.value);
+      };
+      runBtn.addEventListener('click', runReport);
+      function handleSheetDownload(startDate, endDate) {
+        const btn = document.getElementById('download-sheet-btn');
+        btn.disabled = true; btn.textContent = 'Generating...';
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res.success) {
+                btn.textContent = 'Sheet Created!';
+                btn.className = 'btn-green';
+                btn.disabled = true;
+            } else {
+                StatusBanner.show('error', res.error, true);
+                btn.disabled = false; btn.textContent = 'Download as Google Sheet';
+            }
+          })
+          .createReportAsSheet(startDate, endDate);
+      }
+      function handleCsvDownload(headers, data) {
+          const escapeCsvCell = (cell) => `"${(cell || "").toString().replace(/"/g, '""')}"`;
+          const headerRow = headers.map(escapeCsvCell).join(',');
+          const dataRows = data.map(row => row.map(escapeCsvCell).join(','));
+          const csvContent = "data:text/csv;charset=utf-8," + [headerRow, ...dataRows].join("\n");
+          const encodedUri = encodeURI(csvContent);
+          const link = document.createElement("a");
+          link.setAttribute("href", encodedUri);
+          link.setAttribute("download", `break_report_${startDateEl.value}_to_${endDateEl.value}.csv`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+      }
+    }
+
+    // --- INITIALIZATION & ROUTING ---
+    document.addEventListener('DOMContentLoaded', () => {
+      setupTheme();
+      const pageToShow = document.getElementById(PAGE);
+      if (pageToShow) {
+        pageToShow.style.display = 'block';
+        const navLink = document.getElementById(`nav-${PAGE}`);
+        if(navLink) navLink.classList.add('active');
+        
+        switch (PAGE) {
+          case 'home': setupHomePage(); break;
+          case 'supervisor': setupSupervisorPage(); break;
+          case 'report': setupReportPage(); break;
+        }
+      } else {
+        document.getElementById('home').style.display = 'block';
+        document.getElementById('nav-home').classList.add('active');
+        setupHomePage();
+      }
+    });
+  </script>
 </body>
-
 </html>
-
